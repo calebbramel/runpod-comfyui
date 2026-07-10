@@ -12,6 +12,17 @@
 FROM runpod/worker-comfyui:5.8.6-base
 
 # ---------------------------------------------------------------------------
+# Downgrade PyTorch from cu130 → cu121 (compatible with older NVIDIA drivers)
+# The base image ships torch 2.12.0+cu130 which requires driver ≥ r570 (CUDA 13).
+# Some RunPod pods still have older drivers. cu121 works with driver ≥ r525 (CUDA 12).
+# ---------------------------------------------------------------------------
+RUN pip install --no-cache-dir \
+    torch==2.5.1+cu121 \
+    torchvision==0.20.1+cu121 \
+    torchaudio==2.5.1+cu121 \
+    --extra-index-url https://download.pytorch.org/whl/cu121
+
+# ---------------------------------------------------------------------------
 # Video Generation Nodes
 # ---------------------------------------------------------------------------
 
