@@ -29,18 +29,14 @@ RUN comfy-node-install \
     ComfyUI-Manager
 
 # ---------------------------------------------------------------------------
-# Models — baked into the image (~36 GB)
+# Startup script — provisions models from network volume at container start
 # ---------------------------------------------------------------------------
-# LTX 2.3 distilled checkpoint + Gemma 3 12B text encoder.
-# Lives in the image so serverless cold starts don't depend on a network volume.
-RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/text_encoders && \
-    wget --progress=bar:force -q --show-progress \
-        -O /comfyui/models/checkpoints/ltx-2.3-22b-distilled-1.1.safetensors \
-        "https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-22b-distilled-1.1.safetensors" && \
-    wget --progress=bar:force -q --show-progress \
-        -O /comfyui/models/text_encoders/gemma_3_12B_it.safetensors \
-        "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it.safetensors" && \
-    echo "=== Models downloaded ==="
+# On first cold start, downloads missing models to the attached network volume.
+# Subsequent starts are instant — models persist on the volume.
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+ENTRYPOINT ["/bin/bash", "/startup.sh"]
 
 # ---------------------------------------------------------------------------
 # Static Input Files (optional)
