@@ -25,18 +25,26 @@ RUN comfy-node-install \
     ComfyUI-KJNodes \
     rgthree-comfy \
     efficiency-nodes-comfyui \
-    comfyui-tooling-nodes \
     ComfyUI-Manager
 
 # ---------------------------------------------------------------------------
-# Startup script — provisions models from network volume at container start
+# Models — all models live on the Network Volume, not in the image
 # ---------------------------------------------------------------------------
-# On first cold start, downloads missing models to the attached network volume.
-# Subsequent starts are instant — models persist on the volume.
-COPY startup.sh /startup.sh
-RUN chmod +x /startup.sh
-
-ENTRYPOINT ["/bin/bash", "/startup.sh"]
+# Use download-models.sh to populate your Network Volume:
+#   1. Create a RunPod Network Volume in your endpoint's region (80+ GB)
+#   2. Attach it to a temporary GPU pod
+#   3. Run: bash download-models.sh /runpod-volume
+#   4. Detach and attach it to your serverless endpoint
+#
+# The worker auto-detects models under /runpod-volume/models/:
+#   /runpod-volume/models/
+#   ├── diffusion_models/   ← WAN 2.1/2.2 (BF16/FP16)
+#   ├── text_encoders/      ← UMT5-XXL, T5-XXL
+#   ├── vae/                ← wan_2.1_vae, ltx VAE
+#   ├── checkpoints/        ← LTX 2.3 distilled + upscalers
+#   ├── upscale_models/     ← ESRGAN
+#   ├── clip_vision/
+#   └── loras/              ← anime style LoRAs
 
 # ---------------------------------------------------------------------------
 # Static Input Files (optional)
