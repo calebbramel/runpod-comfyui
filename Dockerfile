@@ -16,25 +16,25 @@ FROM runpod/worker-comfyui:5.8.6-base
 # ---------------------------------------------------------------------------
 
 # WAN Video — WAN 2.2, VACE, Fun, Phantom, ReCamMaster
-RUN comfy-node-install comfyui-wan-video-wrapper
+RUN comfy-node-install ComfyUI-WanVideoWrapper
 
 # WanAnimate Enhancer — anime motion/expression/pose control
-RUN comfy-node-install comfyui-wananimate-enhancer
+RUN comfy-node-install ComfyUI-WanAnimate-Enhancer
 
 # LTX-Video — fast I2V/T2V
-RUN comfy-node-install comfyui-ltxvideo
+RUN comfy-node-install ComfyUI-LTXVideo
 
 # Video Helper Suite — load, combine, export video files
-RUN comfy-node-install comfyui-videohelpersuite
+RUN comfy-node-install ComfyUI-VideoHelperSuite
 
 # GGUF — quantized model support
-RUN comfy-node-install comfyui-gguf
+RUN comfy-node-install ComfyUI-GGUF
 
 # FlashVSR — diffusion-based video super resolution (2×/4× upscale to 1080p/4K)
-RUN comfy-node-install comfyui-flashvsr
+RUN comfy-node-install ComfyUI-FlashVSR
 
 # KJNodes — advanced video workflow utilities (grow masks, batch tools)
-RUN comfy-node-install comfyui-kjnodes
+RUN comfy-node-install ComfyUI-KJNodes
 
 # ---------------------------------------------------------------------------
 # Quality-of-Life Nodes
@@ -47,7 +47,7 @@ RUN comfy-node-install rgthree-comfy
 RUN comfy-node-install efficiency-nodes-comfyui
 
 # ComfyUI Manager — install/update nodes from the UI
-RUN comfy-node-install comfyui-manager
+RUN comfy-node-install ComfyUI-Manager
 
 # ---------------------------------------------------------------------------
 # Models — all models live on the Network Volume, not in the image
