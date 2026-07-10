@@ -15,6 +15,14 @@ FROM runpod/worker-comfyui:5.8.6-base
 # Video Generation Nodes
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Python dependencies required by custom nodes, pinned for compatibility
+# ---------------------------------------------------------------------------
+RUN pip install --no-cache-dir \
+    gguf>=0.17.1 \
+    accelerate>=1.2.1 \
+    "kornia==0.7.2"
+
 # All custom nodes in one layer — video gen + QoL
 RUN comfy-node-install \
     ComfyUI-WanVideoWrapper \
@@ -47,7 +55,9 @@ RUN comfy-node-install \
 #   └── loras/              ← anime style LoRAs
 
 # ---------------------------------------------------------------------------
-# Static Input Files (optional)
+# Input Files via Network Volume
 # ---------------------------------------------------------------------------
-# Place workflow reference images, watermarks, or template videos in ./input/
-# COPY input/ /comfyui/input/
+# Upload images/videos to your Network Volume under /input/.
+# At runtime the volume is mounted at /runpod-volume, and this symlink
+# makes those files visible to ComfyUI's Load Image/Load Video nodes.
+RUN rm -rf /comfyui/input && ln -s /runpod-volume/input /comfyui/input
