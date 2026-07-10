@@ -34,7 +34,9 @@ RUN pip install --no-cache-dir \
     accelerate>=1.2.1 \
     "kornia==0.7.2" \
     ftfy \
-    diffusers
+    diffusers \
+    opencv-python-headless \
+    "sageattention==1.0.6"
 
 # All custom nodes in one layer — video gen + QoL
 RUN comfy-node-install \
@@ -87,7 +89,8 @@ RUN chmod +x /startup.sh
 
 # ---------------------------------------------------------------------------
 # Handler — patches S3 upload to use our Hetzner bucket name
+# (copied to a different name so it doesn't overwrite the base image's handler)
 # ---------------------------------------------------------------------------
-COPY handler.py /handler.py
+COPY handler.py /patched_handler.py
 
 ENTRYPOINT ["/startup.sh"]

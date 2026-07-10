@@ -115,4 +115,4 @@ done
 # ---------------------------------------------------------------------------
 # Hand off to the base image's RunPod worker
 # ---------------------------------------------------------------------------
-exec python -u /handler.py
+exec python -u /patched_handler.py
