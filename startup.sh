@@ -118,6 +118,30 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Start ComfyUI in the background
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Starting ComfyUI ==="
+cd /comfyui
+python main.py --listen 0.0.0.0 --port 8188 &
+COMFY_PID=$!
+echo "ComfyUI PID: ${COMFY_PID}"
+
+# Wait for the API to come up
+echo "=== Waiting for ComfyUI API ==="
+for i in $(seq 1 120); do
+    if curl -s http://127.0.0.1:8188/ > /dev/null 2>&1; then
+        echo "ComfyUI API ready after ${i}s"
+        break
+    fi
+    if ! kill -0 "${COMFY_PID}" 2>/dev/null; then
+        echo "ERROR: ComfyUI process died! Check logs above."
+        exit 1
+    fi
+    sleep 1
+done
+
+# ---------------------------------------------------------------------------
 # Hand off to the base image's RunPod worker
 # ---------------------------------------------------------------------------
 exec python -u /handler.py
