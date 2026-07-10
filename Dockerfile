@@ -21,7 +21,8 @@ FROM runpod/worker-comfyui:5.8.6-base
 RUN pip install --no-cache-dir \
     gguf>=0.17.1 \
     accelerate>=1.2.1 \
-    "kornia==0.7.2"
+    "kornia==0.7.2" \
+    ftfy
 
 # All custom nodes in one layer — video gen + QoL
 RUN comfy-node-install \

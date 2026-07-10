@@ -45,45 +45,11 @@ if [ -d "$VOLUME" ] && { mountpoint -q "$VOLUME" 2>/dev/null || df "$VOLUME" 2>/
         "ltx-2.3-22b-distilled-1.1.safetensors"
 
     echo ""
-    echo "=== Gemma 3 12B Text Encoder (~24 GB, gated — needs HF_TOKEN) ==="
-    GEMMA_DIR="${MODELS_DIR}/text_encoders"
-    # Check for one of the sharded files as a sentinel
-    if [ -f "${GEMMA_DIR}/model-00001-of-00005.safetensors" ]; then
-        echo "  [OK] Gemma 3 12B (already present)"
-    else
-        echo "  [DOWNLOAD] Gemma 3 12B ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
-        echo "  This is a gated model — requires HF_TOKEN env var."
-
-        if [ -z "${HF_TOKEN:-}" ]; then
-            echo "  [SKIP] HF_TOKEN not set. Pre-populate /runpod-volume/models/text_encoders/"
-            echo "         with the google/gemma-3-12b-it model files manually."
-        else
-            python3 -c "
-from huggingface_hub import hf_hub_download
-files = [
-    'model-00001-of-00005.safetensors',
-    'model-00002-of-00005.safetensors',
-    'model-00003-of-00005.safetensors',
-    'model-00004-of-00005.safetensors',
-    'model-00005-of-00005.safetensors',
-    'tokenizer.model',
-    'preprocessor_config.json',
-    'config.json',
-    'model.safetensors.index.json',
-]
-for f in files:
-    hf_hub_download(
-        repo_id='google/gemma-3-12b-it',
-        filename=f,
-        local_dir='${GEMMA_DIR}',
-        local_dir_use_symlinks=False,
-        token='${HF_TOKEN}',
-    )
-    print(f'  [OK] {f}')
-"
-        fi
-        echo "  [DONE] Gemma 3 12B ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
-    fi
+    echo "=== Gemma 3 12B Text Encoder (~24 GB) ==="
+    download \
+        "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it.safetensors" \
+        "${MODELS_DIR}/text_encoders" \
+        "gemma_3_12B_it.safetensors"
 
     # ---------------------------------------------------------------------------
     # Symlink network volume models → /comfyui/models so ComfyUI sees them
@@ -122,9 +88,14 @@ fi
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Starting ComfyUI ==="
+
+# Disable manager network calls — everything should be pre-installed
+comfy-manager-set-mode offline 2>/dev/null || true
+
 cd /comfyui
-python main.py --listen 0.0.0.0 --port 8188 &
+python main.py --listen 0.0.0.0 --port 8188 --disable-auto-launch --disable-metadata &
 COMFY_PID=$!
+echo "${COMFY_PID}" > /tmp/comfyui.pid
 echo "ComfyUI PID: ${COMFY_PID}"
 
 # Wait for the API to come up
