@@ -55,9 +55,20 @@ RUN comfy-node-install \
 #   └── loras/              ← anime style LoRAs
 
 # ---------------------------------------------------------------------------
-# Input Files via Network Volume
+# Model & Input Symlinks → Network Volume
 # ---------------------------------------------------------------------------
-# Upload images/videos to your Network Volume under /input/.
-# At runtime the volume is mounted at /runpod-volume, and this symlink
-# makes those files visible to ComfyUI's Load Image/Load Video nodes.
-RUN rm -rf /comfyui/input && ln -s /runpod-volume/input /comfyui/input
+# At runtime the Network Volume is mounted at /runpod-volume. These symlinks
+# make models and input files visible to ComfyUI. They're broken at build
+# time but resolve when the volume is attached.
+RUN for subdir in checkpoints text_encoders vae diffusion_models clip_vision loras upscale_models; do \
+        rm -rf /comfyui/models/${subdir} && \
+        ln -sf /runpod-volume/models/${subdir} /comfyui/models/${subdir}; \
+    done && \
+    rm -rf /comfyui/input && ln -sf /runpod-volume/input /comfyui/input
+
+# ---------------------------------------------------------------------------
+# Startup script — auto-downloads missing models at container start
+# ---------------------------------------------------------------------------
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+ENTRYPOINT ["/startup.sh"]
