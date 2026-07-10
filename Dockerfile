@@ -84,4 +84,10 @@ RUN for subdir in checkpoints text_encoders vae diffusion_models clip_vision lor
 # ---------------------------------------------------------------------------
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
+
+# ---------------------------------------------------------------------------
+# Handler — patches S3 upload to use our Hetzner bucket name
+# ---------------------------------------------------------------------------
+COPY handler.py /handler.py
+
 ENTRYPOINT ["/startup.sh"]
