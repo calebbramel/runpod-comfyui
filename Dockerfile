@@ -29,23 +29,18 @@ RUN comfy-node-install \
     ComfyUI-Manager
 
 # ---------------------------------------------------------------------------
-# Models — all models live on the Network Volume, not in the image
+# Models — baked into the image (~36 GB)
 # ---------------------------------------------------------------------------
-# Use download-models.sh to populate your Network Volume:
-#   1. Create a RunPod Network Volume in your endpoint's region (80+ GB)
-#   2. Attach it to a temporary GPU pod
-#   3. Run: bash download-models.sh /runpod-volume
-#   4. Detach and attach it to your serverless endpoint
-#
-# The worker auto-detects models under /runpod-volume/models/:
-#   /runpod-volume/models/
-#   ├── diffusion_models/   ← WAN 2.1/2.2 (BF16/FP16)
-#   ├── text_encoders/      ← UMT5-XXL, T5-XXL
-#   ├── vae/                ← wan_2.1_vae, ltx VAE
-#   ├── checkpoints/        ← LTX 2.3 distilled + upscalers
-#   ├── upscale_models/     ← ESRGAN
-#   ├── clip_vision/
-#   └── loras/              ← anime style LoRAs
+# LTX 2.3 distilled checkpoint + Gemma 3 12B text encoder.
+# Lives in the image so serverless cold starts don't depend on a network volume.
+RUN mkdir -p /comfyui/models/checkpoints /comfyui/models/text_encoders && \
+    wget --progress=bar:force -q --show-progress \
+        -O /comfyui/models/checkpoints/ltx-2.3-22b-distilled-1.1.safetensors \
+        "https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-22b-distilled-1.1.safetensors" && \
+    wget --progress=bar:force -q --show-progress \
+        -O /comfyui/models/text_encoders/gemma_3_12B_it.safetensors \
+        "https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it.safetensors" && \
+    echo "=== Models downloaded ==="
 
 # ---------------------------------------------------------------------------
 # Static Input Files (optional)
