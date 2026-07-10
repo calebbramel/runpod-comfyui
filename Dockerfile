@@ -25,6 +25,7 @@ RUN comfy-node-install \
     ComfyUI-KJNodes \
     rgthree-comfy \
     efficiency-nodes-comfyui \
+    comfyui-tooling-nodes \
     ComfyUI-Manager
 
 # ---------------------------------------------------------------------------
