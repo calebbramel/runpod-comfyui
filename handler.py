@@ -5,7 +5,6 @@ Patches S3 upload for Hetzner Object Storage compatibility.
 import os
 import runpod
 from runpod.serverless.utils import rp_upload
-import botocore.config
 
 # ---------------------------------------------------------------------------
 # Patch get_boto_client — the base image's boto3 config is built for
@@ -49,7 +48,8 @@ def _hetzner_boto_client(bucket_creds=None):
     )
 
     session = boto3.Session()
-    return session.client(
+    transfer_config = boto3.s3.transfer.TransferConfig(multipart_threshold=25 * 1024)
+    client = session.client(
         "s3",
         endpoint_url=endpoint,
         aws_access_key_id=bucket_creds.get("access_key_id"),
@@ -57,6 +57,7 @@ def _hetzner_boto_client(bucket_creds=None):
         config=boto_config,
         region_name=region,
     )
+    return client, transfer_config
 
 rp_upload.get_boto_client = _hetzner_boto_client
 
