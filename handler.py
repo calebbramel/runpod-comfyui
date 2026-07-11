@@ -27,6 +27,7 @@ def _hetzner_boto_client(bucket_creds=None):
         return _original_get_boto_client(bucket_creds)
 
     import boto3
+    from boto3.s3.transfer import TransferConfig
     from botocore.config import Config as BotoConfig
 
     # Extract region from endpoint (e.g. hel1 from hel1.your-objectstorage.com)
@@ -48,7 +49,7 @@ def _hetzner_boto_client(bucket_creds=None):
     )
 
     session = boto3.Session()
-    transfer_config = boto3.s3.transfer.TransferConfig(multipart_threshold=25 * 1024)
+    transfer_config = TransferConfig(multipart_threshold=25 * 1024)
     client = session.client(
         "s3",
         endpoint_url=endpoint,
